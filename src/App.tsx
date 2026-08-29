@@ -26,7 +26,8 @@ import {
   Clock, 
   Info,
   ChevronRight,
-  Sparkle
+  Sparkle,
+  X
 } from "lucide-react";
 import { 
   ResponsiveContainer, 
@@ -74,12 +75,6 @@ export default function App() {
     }
   });
   const [isUpgrading, setIsUpgrading] = useState<boolean>(false);
-  
-  // PayPal checkout integration states
-  const [isSimulatingPayPal, setIsSimulatingPayPal] = useState<boolean>(false);
-  const [payPalStep, setPayPalStep] = useState<"login" | "pay" | "processing" | "success">("login");
-  const [payPalEmail, setPayPalEmail] = useState("aitbenmesszakaria-buyer@paypal.com");
-  const [payPalPassword, setPayPalPassword] = useState("password123");
   const [sdkLoaded, setSdkLoaded] = useState<boolean>(false);
 
   const [cardName, setCardName] = useState("");
@@ -506,23 +501,6 @@ export default function App() {
     }, 4500);
   };
 
-  // Trigger simulated PayPal portal
-  const handleTriggerSimulatedPayPal = () => {
-    setPayPalStep("login");
-    setIsSimulatingPayPal(true);
-  };
-
-  const handleSimulatedPayPalSuccess = () => {
-    setIsPro(true);
-    setIsUpgrading(false);
-    setIsSimulatingPayPal(false);
-    triggerFeedback("Premium Health Pro Unlocked! Thank you for subscribing.");
-    if (history.length === 0) {
-      setHistory(DEFAULT_HISTORY_RECORDS);
-    }
-    setActiveTab("recommendations");
-  };
-
   // Load official PayPal script
   useEffect(() => {
     if (!isUpgrading) return;
@@ -545,7 +523,7 @@ export default function App() {
       renderPayPalButtons();
     };
     script.onerror = () => {
-      console.warn("Failed to load PayPal JS SDK. Using robust in-app sandbox gateway.");
+      console.warn("Failed to load PayPal JS SDK.");
       setSdkLoaded(false);
     };
     document.body.appendChild(script);
@@ -593,7 +571,7 @@ export default function App() {
             },
             onError: (err: any) => {
               console.error("PayPal Smart Button Error:", err);
-              triggerFeedback("PayPal payment was interrupted. Try Sandbox Quick Pass for instant access.");
+              triggerFeedback("Payment was not completed. Please check your PayPal details and try again.");
             }
           }).render("#paypal-button-container");
         } catch (err) {
@@ -601,12 +579,6 @@ export default function App() {
         }
       }
     }, 150);
-  };
-
-  // Mock form submission fallback
-  const handleCheckoutSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    handleTriggerSimulatedPayPal();
   };
 
   // Call Gemini API dynamically to fetch professional advice
@@ -750,18 +722,26 @@ export default function App() {
 
       {/* Fully Functional Account Access (Sign In / Sign Up) Modal */}
       {showSignInModal && (
-        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in" id="signin-modal">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-slate-100 overflow-hidden relative">
-            <button 
-              onClick={() => setShowSignInModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-full transition-colors font-semibold z-10"
-              aria-label="Close dialog"
-            >
-              ✕
-            </button>
-
+        <div 
+          className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in" 
+          id="signin-modal"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowSignInModal(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-slate-100 overflow-hidden relative animate-scale-up">
             <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 p-6 text-white relative">
-              <div className="absolute top-4 left-6 px-2.5 py-0.5 bg-slate-800 text-slate-300 rounded-full border border-slate-700 text-[10px] font-mono tracking-wider flex items-center gap-1 font-semibold uppercase">
+              <button 
+                type="button"
+                onClick={() => setShowSignInModal(false)}
+                className="absolute top-4 right-4 z-30 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 active:bg-white/30 p-2 rounded-full transition-all cursor-pointer flex items-center justify-center border border-white/15 shadow-sm"
+                aria-label="Close dialog"
+                title="Close"
+              >
+                <X size={18} strokeWidth={2.5} />
+              </button>
+
+              <div className="px-2.5 py-0.5 w-fit bg-slate-800 text-slate-300 rounded-full border border-slate-700 text-[10px] font-mono tracking-wider flex items-center gap-1 font-semibold uppercase">
                 <User size={10} className="text-indigo-400" /> Account Access
               </div>
               <h3 className="text-xl font-bold font-display mt-4">
@@ -919,23 +899,34 @@ export default function App() {
 
       {/* Premium Upgrade Modal */}
       {isUpgrading && (
-        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in" id="upgrade-modal">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-slate-100 overflow-hidden relative">
-            <button 
-              onClick={() => setIsUpgrading(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-full transition-colors"
-              aria-label="Close dialog"
-            >
-              <Trash2 size={16} className="rotate-45" /> {/* Close cross utility */}
-            </button>
-
+        <div 
+          className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in" 
+          id="upgrade-modal"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsUpgrading(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-slate-100 overflow-hidden relative animate-scale-up">
+            
             {/* Modal Heading Section */}
             <div className="bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-950 p-6 text-white relative">
-              <div className="absolute top-4 left-6 px-2.5 py-0.5 bg-indigo-500/20 text-indigo-300 rounded-full border border-indigo-500/30 text-[10px] font-mono tracking-wider flex items-center gap-1 font-semibold uppercase">
+              
+              {/* Prominent High-Contrast Close (X) Button */}
+              <button 
+                type="button"
+                onClick={() => setIsUpgrading(false)}
+                className="absolute top-4 right-4 z-30 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 active:bg-white/30 p-2 rounded-full transition-all cursor-pointer flex items-center justify-center border border-white/15 shadow-sm"
+                aria-label="Close payment window"
+                title="Close"
+              >
+                <X size={18} strokeWidth={2.5} />
+              </button>
+
+              <div className="px-2.5 py-0.5 w-fit bg-indigo-500/20 text-indigo-300 rounded-full border border-indigo-500/30 text-[10px] font-mono tracking-wider flex items-center gap-1 font-semibold uppercase">
                 <Sparkle size={10} className="text-indigo-400" /> Premium Access
               </div>
-              <h3 className="text-xl font-bold font-display mt-4">Elevate Your Health Journey</h3>
-              <p className="text-xs text-indigo-200/80 mt-1 leading-relaxed">
+              <h3 className="text-xl font-bold font-display mt-3 pr-8">Elevate Your Health Journey</h3>
+              <p className="text-xs text-indigo-200/80 mt-1 leading-relaxed pr-6">
                 Supercharge your physical wellness metrics with doctor-formulated intelligence and progress history graphs.
               </p>
               
@@ -971,7 +962,7 @@ export default function App() {
                 </li>
               </ul>
 
-              {/* Real PayPal Buttons & Sandbox Fallback */}
+              {/* Real PayPal Buttons */}
               <div className="mt-4 border-t pt-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-[11px] font-bold text-slate-400 tracking-wider uppercase font-mono">
@@ -988,223 +979,20 @@ export default function App() {
                     <p className="text-[11px] text-slate-400 font-medium">Loading PayPal Smart Buttons...</p>
                   </div>
 
-                  {/* Sandbox Developer Bypass */}
-                  <div className="relative flex py-2 items-center">
-                    <div className="flex-grow border-t border-slate-100"></div>
-                    <span className="flex-shrink mx-3 text-[10px] text-slate-400 font-mono uppercase font-semibold">Or sandbox pass</span>
-                    <div className="flex-grow border-t border-slate-100"></div>
-                  </div>
-
+                  {/* Explicit Secondary Close Button */}
                   <button
                     type="button"
-                    onClick={handleTriggerSimulatedPayPal}
-                    className="w-full bg-[#ffc439] hover:bg-[#f4b31a] text-[#003087] rounded-xl py-3 px-4 text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm border border-[#eed082] cursor-pointer"
+                    onClick={() => setIsUpgrading(false)}
+                    className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 rounded-xl py-2.5 px-4 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <span className="font-mono italic tracking-tight font-extrabold text-[14px]">PayPal</span>
-                    <span className="text-[11px] font-semibold bg-white/40 px-2 py-0.5 rounded text-[#003087]">Sandbox Quick Pass</span>
+                    <X size={14} /> Close & Return
                   </button>
                 </div>
               </div>
 
               <p className="text-[10px] text-center text-slate-400 mt-3 leading-relaxed">
-                🔒 Fully functional PayPal checkout. Set <code className="font-mono bg-slate-100 px-1 rounded text-slate-600">VITE_PAYPAL_CLIENT_ID</code> in environment variables to link your live merchant account. If inside an iframe sandbox, use <strong>Quick Pass</strong> for immediate completion.
+                🔒 Safe and encrypted checkout via official PayPal payment processing.
               </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Simulated PayPal Sandbox Gateway Modal Overlay */}
-      {isSimulatingPayPal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in" id="paypal-sandbox-modal">
-          <div className="bg-[#f5f7fa] rounded-2xl shadow-2xl max-w-md w-full border border-slate-200 overflow-hidden relative font-sans">
-            
-            {/* Header branding */}
-            <div className="bg-[#003087] p-5 text-white flex justify-between items-center relative">
-              <div className="flex items-center gap-2">
-                <span className="font-mono italic font-black text-2xl tracking-tight text-white select-none">
-                  PayPal <span className="text-[#009cde]">Sandbox</span>
-                </span>
-              </div>
-              <div className="text-[10px] bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-2 py-0.5 rounded-full font-mono tracking-wider flex items-center gap-1">
-                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping"></span> Secure Connection
-              </div>
-              
-              <button 
-                onClick={() => setIsSimulatingPayPal(false)}
-                className="absolute top-4 right-4 text-slate-300 hover:text-white p-1 hover:bg-white/10 rounded-full transition-colors"
-                aria-label="Cancel PayPal Session"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Merchant Details Bar */}
-            <div className="bg-[#eef2f7] px-6 py-3 border-b border-slate-200 flex justify-between items-center text-xs text-slate-700">
-              <span className="font-semibold flex items-center gap-1.5">
-                <Scale size={13} className="text-indigo-600" /> BMI Vitality Service
-              </span>
-              <span className="font-mono text-slate-900 font-bold">$2.00 USD</span>
-            </div>
-
-            <div className="p-6">
-              {/* Step 1: PayPal Login */}
-              {payPalStep === "login" && (
-                <div className="space-y-4 animate-fade-in">
-                  <div className="text-center">
-                    <h4 className="text-sm font-bold text-slate-800">Pay with PayPal</h4>
-                    <p className="text-xs text-slate-500 mt-1">Enter your sandbox account credentials to approve the subscription</p>
-                  </div>
-
-                  <form 
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      setPayPalStep("processing");
-                      setTimeout(() => setPayPalStep("pay"), 1200);
-                    }} 
-                    className="space-y-3"
-                  >
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Sandbox Buyer Email</label>
-                      <input 
-                        type="email" 
-                        required
-                        value={payPalEmail}
-                        onChange={(e) => setPayPalEmail(e.target.value)}
-                        className="w-full text-xs p-2.5 bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-[#0070ba] font-mono"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Password</label>
-                      <input 
-                        type="password" 
-                        required
-                        value={payPalPassword}
-                        onChange={(e) => setPayPalPassword(e.target.value)}
-                        className="w-full text-xs p-2.5 bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-[#0070ba] font-mono"
-                      />
-                    </div>
-
-                    <div className="p-2.5 bg-[#fff9e6] rounded-lg border border-[#f5e0a0] text-[10px] text-amber-800 leading-relaxed flex gap-2">
-                      <span className="text-amber-600 font-bold">ℹ</span>
-                      <span>This is a pre-configured buyer profile with a sandbox balance of <strong>$150.00 USD</strong>. Click below to continue.</span>
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full bg-[#0070ba] hover:bg-[#005ea6] text-white py-2.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer mt-2"
-                    >
-                      Log In to PayPal Account
-                    </button>
-                  </form>
-                </div>
-              )}
-
-              {/* Step 2: Payment Review & Approval */}
-              {payPalStep === "pay" && (
-                <div className="space-y-4 animate-fade-in">
-                  <div className="border-b border-slate-200 pb-3">
-                    <h4 className="text-xs font-bold text-slate-500 uppercase font-mono">Review Your Subscription</h4>
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="text-xs text-slate-800 font-semibold">Vitality Pro Monthly Biometrics</span>
-                      <span className="text-xs font-mono font-bold text-slate-900">$2.00 USD / mo</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2.5 text-xs">
-                    <div className="flex justify-between text-slate-600">
-                      <span>Paying From:</span>
-                      <span className="font-semibold text-slate-800">PayPal Wallet Balance</span>
-                    </div>
-                    <div className="flex justify-between text-slate-600">
-                      <span>Available Balance:</span>
-                      <span className="font-mono text-emerald-600 font-bold">$150.00 USD</span>
-                    </div>
-                    <div className="flex justify-between text-slate-600 border-t pt-2">
-                      <span>Recipient:</span>
-                      <span className="font-semibold text-slate-800">BMI Vitality LLC</span>
-                    </div>
-                    <div className="flex justify-between text-slate-800 font-bold text-sm border-t border-dashed border-slate-200 pt-2.5">
-                      <span>Total Due Today:</span>
-                      <span className="font-mono text-[#003087]">$2.00 USD</span>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-100 p-2.5 rounded-lg text-[10px] text-slate-500 leading-relaxed">
-                    By clicking "Complete Purchase", you authorize a recurring sandbox payment of $2.00 USD each month to BMI Vitality. You can cancel this test plan at any time.
-                  </div>
-
-                  <div className="flex gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setPayPalStep("login")}
-                      className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 py-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
-                    >
-                      Back
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPayPalStep("processing");
-                        setTimeout(() => setPayPalStep("success"), 1500);
-                      }}
-                      className="flex-2 bg-[#ffc439] hover:bg-[#f4b31a] text-[#003087] py-2.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
-                    >
-                      Complete Purchase
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 3: Processing loading state */}
-              {payPalStep === "processing" && (
-                <div className="py-10 text-center space-y-4">
-                  <div className="w-12 h-12 border-4 border-[#0070ba] border-t-transparent rounded-full animate-spin mx-auto"></div>
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-800">Processing PayPal Authorization</h4>
-                    <p className="text-xs text-slate-500 mt-1">Securing token and logging sandbox transaction receipt...</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 4: Success confirmation screen */}
-              {payPalStep === "success" && (
-                <div className="py-2 text-center space-y-4 animate-fade-in">
-                  <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto text-emerald-500 border-2 border-emerald-500/20">
-                    <Check size={32} strokeWidth={3} className="animate-pulse" />
-                  </div>
-
-                  <div>
-                    <h4 className="text-base font-bold text-slate-800">Payment Approved!</h4>
-                    <p className="text-xs text-slate-500 mt-1">Your sandbox account was charged successfully.</p>
-                  </div>
-
-                  <div className="bg-slate-100 p-3 rounded-xl border border-slate-200 space-y-1.5 text-left font-mono text-[10px]">
-                    <div className="flex justify-between text-slate-500">
-                      <span>Status:</span>
-                      <span className="text-emerald-600 font-bold uppercase">COMPLETED</span>
-                    </div>
-                    <div className="flex justify-between text-slate-500">
-                      <span>Trans ID:</span>
-                      <span className="text-slate-700 font-semibold">TX-PAYPAL-{Math.random().toString(36).substring(2, 9).toUpperCase()}</span>
-                    </div>
-                    <div className="flex justify-between text-slate-500">
-                      <span>Charge:</span>
-                      <span className="text-slate-800 font-bold">$2.00 USD</span>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleSimulatedPayPalSuccess}
-                    className="w-full bg-[#0070ba] hover:bg-[#005ea6] text-white py-2.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
-                  >
-                    Return to Vitality Pro & Unlock Plans
-                  </button>
-                </div>
-              )}
-
             </div>
           </div>
         </div>
