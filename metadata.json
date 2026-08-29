@@ -1,0 +1,6 @@
+{
+  "name": "BMI Calculator Service",
+  "description": "Calculates BMI and provides health categories, personalized diet/exercise recommendations, history storage, and affiliate fitness resources.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
