@@ -1090,7 +1090,7 @@ export default function App() {
               )}
 
               {isPro ? (
-                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-2xs">
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-2xs">
                   <Sparkles size={12} className="text-emerald-600 fill-emerald-200" />
                   <span>Pro Member</span>
                 </div>
@@ -1104,19 +1104,6 @@ export default function App() {
                   <span>Upgrade to Pro</span>
                 </button>
               )}
-
-              {/* Dev simulation utility toggle */}
-              <button 
-                onClick={() => {
-                  setIsPro(!isPro);
-                  triggerFeedback(isPro ? "Reverted back to free testing mode." : "Simulated Pro License unlock!");
-                }}
-                className="text-[10px] bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg p-1 font-mono text-slate-500 rounded-sm cursor-pointer"
-                title="Simulation Toggle (Pro / Free) for testing purposes"
-                id="dev-toggle-pro"
-              >
-                {isPro ? "Reset Free" : "Sim Pro"}
-              </button>
             </div>
 
           </div>
